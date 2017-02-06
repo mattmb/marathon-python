@@ -1,3 +1,6 @@
+from simplejson.scanner import JSONDecodeError
+
+
 class MarathonError(Exception):
     pass
 
@@ -10,9 +13,12 @@ class MarathonHttpError(MarathonError):
         """
         self.error_message = response.reason or ''
         if response.content:
-            content = response.json()
-            self.error_message = content.get('message', self.error_message)
-            self.error_details = content.get('details')
+            try:
+                content = response.json()
+                self.error_message = content.get('message', self.error_message)
+                self.error_details = content.get('details')
+            except JSONDecodeError:
+                pass
         self.status_code = response.status_code
         super(MarathonHttpError, self).__init__(self.__str__())
 
